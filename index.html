@@ -628,6 +628,7 @@ section { padding: 7rem 2.5rem; }
   position: relative;
   overflow: hidden;
   border-radius: 20px;
+  -webkit-overflow-scrolling: touch;
 }
 .carousel-track {
   display: flex;
@@ -635,12 +636,12 @@ section { padding: 7rem 2.5rem; }
   flex-wrap: nowrap;
   will-change: transform;
   transition: transform 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  touch-action: pan-y;
 }
-.carousel-track.no-transition { transition: none; }
+.carousel-track.no-transition { transition: none !important; }
 .carousel-slide {
   min-width: 100%;
   width: 100%;
+  flex-shrink: 0;
   box-sizing: border-box;
 }
 .carousel-slide .inside-card {
@@ -1627,93 +1628,94 @@ window.addEventListener('scroll', () => {
 // ── SWIPE CAROUSEL ──
 (function() {
   var track = document.getElementById('carouselTrack');
-  var dots  = document.querySelectorAll('.cdot');
+  var dotsEl = document.querySelectorAll('.cdot');
   if (!track) return;
 
-  var slides  = track.querySelectorAll('.carousel-slide');
-  var total   = slides.length;
-  var current = 0;
-  var startX  = 0;
-  var startY  = 0;
-  var diffX   = 0;
-  var locked  = false; // true = scrolling vertically, ignore this swipe
+  var slides = track.querySelectorAll('.carousel-slide');
+  var total  = slides.length;
+  var cur    = 0;
   var autoTimer;
-  var AUTOPLAY_DELAY = 4500; // ms per slide
+  var DELAY  = 4500;
 
-  function getSlideWidth() {
-    return slides[0].getBoundingClientRect().width;
-  }
+  var t0x, t0y, tDx, tMoved, tDir;
 
-  function moveTo(idx, animate) {
-    current = (idx + total) % total;
-    if (animate === false) track.classList.add('no-transition');
-    else track.classList.remove('no-transition');
-    track.style.transform = 'translateX(' + (-current * getSlideWidth()) + 'px)';
-    dots.forEach(function(d, i) { d.classList.toggle('active', i === current); });
+  function sw() { return track.parentElement.offsetWidth; }
+
+  function snap(idx, anim) {
+    cur = ((idx % total) + total) % total;
+    if (!anim) { track.classList.add('no-transition'); }
+    else        { track.classList.remove('no-transition'); }
+    track.style.transform = 'translateX(' + (-cur * sw()) + 'px)';
+    dotsEl.forEach(function(d, i) { d.classList.toggle('active', i === cur); });
+    if (!anim) { track.offsetHeight; /* force reflow */ track.classList.remove('no-transition'); }
   }
 
   function resetAuto() {
     clearInterval(autoTimer);
-    autoTimer = setInterval(function() { moveTo(current + 1, true); }, AUTOPLAY_DELAY);
+    autoTimer = setInterval(function() { snap(cur + 1, true); }, DELAY);
   }
 
-  // Dots
-  dots.forEach(function(d) {
-    d.addEventListener('click', function() {
-      moveTo(+d.dataset.i, true);
-      resetAuto();
-    });
+  dotsEl.forEach(function(d) {
+    d.addEventListener('click', function() { snap(+d.dataset.i, true); resetAuto(); });
   });
 
-  // Touch — only intercept horizontal swipes, let vertical scroll through
+  // ── Touch ──
   track.addEventListener('touchstart', function(e) {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    diffX  = 0;
-    locked = false;
+    t0x    = e.changedTouches[0].pageX;
+    t0y    = e.changedTouches[0].pageY;
+    tDx    = 0;
+    tMoved = false;
+    tDir   = null;          // 'h' | 'v' | null
+    clearInterval(autoTimer);
   }, { passive: true });
 
   track.addEventListener('touchmove', function(e) {
-    var dx = e.touches[0].clientX - startX;
-    var dy = e.touches[0].clientY - startY;
+    var dx = e.changedTouches[0].pageX - t0x;
+    var dy = e.changedTouches[0].pageY - t0y;
 
-    // Decide direction on first significant move
-    if (!locked && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
-    if (!locked) { locked = Math.abs(dy) > Math.abs(dx); }
-    if (locked) return; // vertical scroll wins
+    // Detect direction once
+    if (tDir === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+      tDir = Math.abs(dx) >= Math.abs(dy) ? 'h' : 'v';
+    }
+    if (tDir !== 'h') return;   // vertical scroll → don't interfere
 
-    // Horizontal — prevent page scroll and track finger
-    e.preventDefault();
-    diffX = dx;
+    e.preventDefault();         // block page scroll while swiping cards
+    tMoved = true;
+    tDx = dx;
+
+    // Live drag feedback
     track.classList.add('no-transition');
-    track.style.transform = 'translateX(' + (-current * getSlideWidth() + diffX) + 'px)';
-  }, { passive: false });
+    track.style.transform = 'translateX(' + (-cur * sw() + tDx) + 'px)';
+  }, { passive: false });       // ← MUST be false to allow preventDefault
 
   track.addEventListener('touchend', function() {
-    if (locked) { locked = false; return; }
+    if (tDir !== 'h') { resetAuto(); return; }
     track.classList.remove('no-transition');
-    if (diffX < -40)      moveTo(current + 1, true);
-    else if (diffX > 40)  moveTo(current - 1, true);
-    else                  moveTo(current, true); // snap back
-    diffX = 0;
+    if      (tDx < -40) snap(cur + 1, true);
+    else if (tDx >  40) snap(cur - 1, true);
+    else                snap(cur, true);
+    tDx = 0; tMoved = false;
     resetAuto();
   }, { passive: true });
 
-  // Recalculate on resize
-  window.addEventListener('resize', function() { moveTo(current, false); });
+  track.addEventListener('touchcancel', function() {
+    snap(cur, true);
+    resetAuto();
+  }, { passive: true });
 
-  // Init + autoplay
-  moveTo(0, false);
-  resetAuto();
+  // Resize
+  window.addEventListener('resize', function() { snap(cur, false); });
 
-  // Pause autoplay when section not visible
+  // Pause when out of view
   var section = document.getElementById('inside');
-  if (section && 'IntersectionObserver' in window) {
+  if (section && window.IntersectionObserver) {
     new IntersectionObserver(function(entries) {
-      if (entries[0].isIntersecting) resetAuto();
-      else clearInterval(autoTimer);
-    }, { threshold: 0.3 }).observe(section);
+      entries[0].isIntersecting ? resetAuto() : clearInterval(autoTimer);
+    }, { threshold: 0.25 }).observe(section);
   }
+
+  snap(0, false);
+  resetAuto();
 })();
 const revealEls = document.querySelectorAll('.reveal');
 const revealObs = new IntersectionObserver((entries) => {
