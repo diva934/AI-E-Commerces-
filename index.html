@@ -1625,86 +1625,113 @@ window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', scrolled > 60);
 });
 
-// ── SWIPE CAROUSEL ──
+// ── INFINITE SWIPE CAROUSEL ──
 (function() {
-  var track = document.getElementById('carouselTrack');
-  var dotsEl = document.querySelectorAll('.cdot');
-  if (!track) return;
+  var carousel = document.getElementById('carouselTrack');
+  var dotsEl   = document.querySelectorAll('.cdot');
+  if (!carousel) return;
 
-  var slides = track.querySelectorAll('.carousel-slide');
-  var total  = slides.length;
-  var cur    = 0;
+  var origSlides = Array.prototype.slice.call(carousel.querySelectorAll('.carousel-slide'));
+  var total      = origSlides.length;
+  var DELAY      = 4500;
   var autoTimer;
-  var DELAY  = 4500;
 
-  var t0x, t0y, tDx, tMoved, tDir;
+  // Clone first and last slides for infinite loop
+  var cloneFirst = origSlides[0].cloneNode(true);
+  var cloneLast  = origSlides[total - 1].cloneNode(true);
+  carousel.appendChild(cloneFirst);
+  carousel.insertBefore(cloneLast, origSlides[0]);
 
-  function sw() { return track.parentElement.offsetWidth; }
+  // All slides now: [cloneLast, 0, 1, 2, 3, 4, cloneFirst]
+  // Real slides start at index 1
+  var cur = 1; // points to real slide index in DOM
 
-  function snap(idx, anim) {
-    cur = ((idx % total) + total) % total;
-    if (!anim) { track.classList.add('no-transition'); }
-    else        { track.classList.remove('no-transition'); }
-    track.style.transform = 'translateX(' + (-cur * sw()) + 'px)';
-    dotsEl.forEach(function(d, i) { d.classList.toggle('active', i === cur); });
-    if (!anim) { track.offsetHeight; /* force reflow */ track.classList.remove('no-transition'); }
+  function sw() { return carousel.parentElement.offsetWidth; }
+
+  function setPos(idx, animated) {
+    if (!animated) carousel.classList.add('no-transition');
+    else           carousel.classList.remove('no-transition');
+    carousel.style.transform = 'translateX(' + (-idx * sw()) + 'px)';
+    if (!animated) { carousel.offsetHeight; carousel.classList.remove('no-transition'); }
   }
+
+  function updateDots(realIdx) {
+    // realIdx: 1-based DOM index → 0-based dot index
+    var dot = ((realIdx - 1) + total) % total;
+    dotsEl.forEach(function(d, i) { d.classList.toggle('active', i === dot); });
+  }
+
+  function goTo(domIdx, animated) {
+    cur = domIdx;
+    setPos(cur, animated !== false);
+    updateDots(cur);
+  }
+
+  // After transition ends, silently jump if on clone
+  carousel.addEventListener('transitionend', function() {
+    if (cur === 0) {
+      // on cloneLast → jump to real last
+      goTo(total, false);
+    } else if (cur === total + 1) {
+      // on cloneFirst → jump to real first
+      goTo(1, false);
+    }
+  });
 
   function resetAuto() {
     clearInterval(autoTimer);
-    autoTimer = setInterval(function() { snap(cur + 1, true); }, DELAY);
+    autoTimer = setInterval(function() { goTo(cur + 1, true); }, DELAY);
   }
 
+  // Dots
   dotsEl.forEach(function(d) {
-    d.addEventListener('click', function() { snap(+d.dataset.i, true); resetAuto(); });
+    d.addEventListener('click', function() {
+      goTo(+d.dataset.i + 1, true); // dot index 0 → DOM index 1
+      resetAuto();
+    });
   });
 
   // ── Touch ──
-  track.addEventListener('touchstart', function(e) {
-    t0x    = e.changedTouches[0].pageX;
-    t0y    = e.changedTouches[0].pageY;
-    tDx    = 0;
-    tMoved = false;
-    tDir   = null;          // 'h' | 'v' | null
+  var t0x, t0y, tDx, tDir;
+
+  carousel.addEventListener('touchstart', function(e) {
+    t0x  = e.changedTouches[0].pageX;
+    t0y  = e.changedTouches[0].pageY;
+    tDx  = 0;
+    tDir = null;
     clearInterval(autoTimer);
   }, { passive: true });
 
-  track.addEventListener('touchmove', function(e) {
+  carousel.addEventListener('touchmove', function(e) {
     var dx = e.changedTouches[0].pageX - t0x;
     var dy = e.changedTouches[0].pageY - t0y;
 
-    // Detect direction once
     if (tDir === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
       tDir = Math.abs(dx) >= Math.abs(dy) ? 'h' : 'v';
     }
-    if (tDir !== 'h') return;   // vertical scroll → don't interfere
+    if (tDir !== 'h') return;
 
-    e.preventDefault();         // block page scroll while swiping cards
-    tMoved = true;
+    e.preventDefault();
     tDx = dx;
+    carousel.classList.add('no-transition');
+    carousel.style.transform = 'translateX(' + (-cur * sw() + tDx) + 'px)';
+  }, { passive: false });
 
-    // Live drag feedback
-    track.classList.add('no-transition');
-    track.style.transform = 'translateX(' + (-cur * sw() + tDx) + 'px)';
-  }, { passive: false });       // ← MUST be false to allow preventDefault
-
-  track.addEventListener('touchend', function() {
+  carousel.addEventListener('touchend', function() {
     if (tDir !== 'h') { resetAuto(); return; }
-    track.classList.remove('no-transition');
-    if      (tDx < -40) snap(cur + 1, true);
-    else if (tDx >  40) snap(cur - 1, true);
-    else                snap(cur, true);
-    tDx = 0; tMoved = false;
+    carousel.classList.remove('no-transition');
+    if      (tDx < -40) goTo(cur + 1, true);
+    else if (tDx >  40) goTo(cur - 1, true);
+    else                goTo(cur, true);
+    tDx = 0;
     resetAuto();
   }, { passive: true });
 
-  track.addEventListener('touchcancel', function() {
-    snap(cur, true);
-    resetAuto();
+  carousel.addEventListener('touchcancel', function() {
+    goTo(cur, true); resetAuto();
   }, { passive: true });
 
-  // Resize
-  window.addEventListener('resize', function() { snap(cur, false); });
+  window.addEventListener('resize', function() { goTo(cur, false); });
 
   // Pause when out of view
   var section = document.getElementById('inside');
@@ -1714,7 +1741,7 @@ window.addEventListener('scroll', () => {
     }, { threshold: 0.25 }).observe(section);
   }
 
-  snap(0, false);
+  goTo(1, false);
   resetAuto();
 })();
 const revealEls = document.querySelectorAll('.reveal');
