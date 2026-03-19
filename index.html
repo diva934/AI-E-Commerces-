@@ -617,12 +617,62 @@ section { padding: 7rem 2.5rem; }
   text-align: center;
   margin-top: 3rem;
 }
+
+/* ─── DESKTOP / MOBILE TOGGLE ─── */
+.desktop-only { display: grid; }
+.mobile-only  { display: none; }
+
+/* ─── SWIPE CAROUSEL ─── */
+.inside-carousel {
+  margin-top: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.carousel-track {
+  display: flex;
+  transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-x;
+}
+.carousel-track.is-dragging { cursor: grabbing; transition: none; }
+.carousel-slide {
+  flex: 0 0 100%;
+  width: 100%;
+}
+.carousel-slide .inside-card {
+  margin: 0;
+  min-height: 200px;
+  border-color: rgba(200,245,58,0.25);
+}
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+.cdot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+.cdot.active {
+  width: 28px;
+  border-radius: 99px;
+  background: var(--lime);
+}
+
 @media (max-width: 900px) {
-  .inside-grid { grid-template-columns: 1fr 1fr; }
+  .desktop-only { display: none !important; }
+  .mobile-only  { display: block !important; }
 }
-@media (max-width: 580px) {
-  .inside-grid { grid-template-columns: 1fr; }
-}
+
 
 /* ─── RESULTS ─── */
 #results { background: var(--paper); }
@@ -1298,39 +1348,85 @@ footer strong { color: var(--lime); }
       <p class="section-sub">Everything you need to build and monetize your AI content system — without confusion.</p>
     </div>
     <p class="inside-clarity reveal">No fluff. No theory. Just what works.</p>
-    <div class="inside-grid reveal">
 
+    <!-- Desktop grid -->
+    <div class="inside-grid reveal desktop-only">
       <div class="inside-card">
         <div class="inside-card-num">01</div>
         <h3>Complete system</h3>
         <p>A clear step-by-step roadmap showing exactly how to go from zero to your first digital sales.</p>
       </div>
-
       <div class="inside-card">
         <div class="inside-card-num">02</div>
         <h3>AI workflow</h3>
         <p>Generate content automatically using AI — without filming, editing, or wasting time every day.</p>
       </div>
-
       <div class="inside-card">
         <div class="inside-card-num">03</div>
         <h3>Monetization guide</h3>
         <p>Structure your offer, price it correctly, and turn attention into real revenue — step by step.</p>
       </div>
-
       <div class="inside-card">
         <div class="inside-card-num">04</div>
         <h3>Templates & scripts</h3>
         <p>Ready-to-use prompts, content structures, and hooks so you never start from scratch again.</p>
       </div>
-
       <div class="inside-card" style="grid-column: span 2;">
         <div class="inside-card-num">05</div>
         <h3>Lifetime access</h3>
         <p>Get full access to the entire system — anytime, on any device. No subscription. No recurring fees. Pay once and keep everything.</p>
       </div>
-
     </div>
+
+    <!-- Mobile swipe carousel -->
+    <div class="inside-carousel mobile-only reveal">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="carousel-slide">
+          <div class="inside-card">
+            <div class="inside-card-num">01</div>
+            <h3>Complete system</h3>
+            <p>A clear step-by-step roadmap showing exactly how to go from zero to your first digital sales.</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <div class="inside-card">
+            <div class="inside-card-num">02</div>
+            <h3>AI workflow</h3>
+            <p>Generate content automatically using AI — without filming, editing, or wasting time every day.</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <div class="inside-card">
+            <div class="inside-card-num">03</div>
+            <h3>Monetization guide</h3>
+            <p>Structure your offer, price it correctly, and turn attention into real revenue — step by step.</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <div class="inside-card">
+            <div class="inside-card-num">04</div>
+            <h3>Templates & scripts</h3>
+            <p>Ready-to-use prompts, content structures, and hooks so you never start from scratch again.</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <div class="inside-card">
+            <div class="inside-card-num">05</div>
+            <h3>Lifetime access</h3>
+            <p>Get full access to the entire system — anytime, on any device. No subscription. No recurring fees. Pay once and keep everything.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Dots -->
+      <div class="carousel-dots" id="carouselDots">
+        <span class="cdot active" data-i="0"></span>
+        <span class="cdot" data-i="1"></span>
+        <span class="cdot" data-i="2"></span>
+        <span class="cdot" data-i="3"></span>
+        <span class="cdot" data-i="4"></span>
+      </div>
+    </div>
+
     <div class="inside-cta-row reveal">
       <button class="btn-primary" style="background:var(--lime);color:var(--ink);border-color:var(--lime)" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
         Start now →
@@ -1527,7 +1623,65 @@ window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', scrolled > 60);
 });
 
-// Reveal on scroll
+// ── SWIPE CAROUSEL ──
+(function() {
+  const track = document.getElementById('carouselTrack');
+  const dots  = document.querySelectorAll('.cdot');
+  if (!track) return;
+
+  const total = track.children.length;
+  let current = 0;
+  let startX = 0;
+  let dragX  = 0;
+  let isDragging = false;
+
+  function goTo(idx) {
+    current = Math.max(0, Math.min(idx, total - 1));
+    track.style.transform = `translateX(${-current * 100}%)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  // Dots click
+  dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.i)));
+
+  // Touch
+  track.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    track.classList.add('is-dragging');
+  }, { passive: true });
+
+  track.addEventListener('touchmove', e => {
+    dragX = e.touches[0].clientX - startX;
+  }, { passive: true });
+
+  track.addEventListener('touchend', () => {
+    track.classList.remove('is-dragging');
+    if (dragX < -50) goTo(current + 1);
+    else if (dragX > 50) goTo(current - 1);
+    dragX = 0;
+  });
+
+  // Mouse drag (desktop fallback)
+  track.addEventListener('mousedown', e => {
+    startX = e.clientX;
+    isDragging = true;
+    track.classList.add('is-dragging');
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    dragX = e.clientX - startX;
+  });
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    track.classList.remove('is-dragging');
+    if (dragX < -60) goTo(current + 1);
+    else if (dragX > 60) goTo(current - 1);
+    dragX = 0;
+  });
+
+  goTo(0);
+})();
 const revealEls = document.querySelectorAll('.reveal');
 const revealObs = new IntersectionObserver((entries) => {
   entries.forEach((e, i) => {
