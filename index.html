@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Content System — Face-Free Digital Income</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@300;400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink: #0a0a08;
+  --paper: #f5f2eb;
+  --lime: #c8f53a;
+  --lime-dark: #9fc41c;
+  --lime-pale: #edfac8;
+  --warm: #e8e0cc;
+  --muted: #7a7568;
+  --line: rgba(10,10,8,0.12);
+  --r: 4px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ─── TYPOGRAPHY ─── */
+.display {
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+}
+.label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 99px; }
+
+/* ─── PROGRESS ─── */
+#progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+  background: var(--lime); z-index: 9999;
+  transition: width 0.1s linear;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  padding: 1.25rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background 0.3s, border-bottom 0.3s;
+}
+nav.scrolled {
+  background: rgba(245,242,235,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.nav-links { display: flex; gap: 2rem; align-items: center; }
+.nav-links a {
+  font-size: 0.85rem; font-weight: 500;
+  color: var(--ink); text-decoration: none; opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.nav-links a:hover { opacity: 1; }
+.nav-cta {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem; font-weight: 700;
+  background: var(--ink); color: var(--lime);
+  padding: 0.65rem 1.4rem;
+  border-radius: 99px;
+  border: none; cursor: pointer;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  transition: transform 0.2s, background 0.2s;
+}
+.nav-cta:hover { background: var(--lime); color: var(--ink); transform: scale(1.02); }
+
+/* ─── HERO ─── */
+#hero {
+  min-height: 100vh;
+  padding: 9rem 2.5rem 5rem;
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: center;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 30%, rgba(200,245,58,0.18), transparent),
+    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(200,245,58,0.1), transparent),
+    var(--paper);
+}
+.hero-grid-lines {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(10,10,8,0.04) 80px),
+    repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(10,10,8,0.04) 80px);
+}
+.hero-inner {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto; width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+}
+.hero-copy { }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: var(--lime); color: var(--ink);
+  padding: 0.4rem 1rem 0.4rem 0.5rem;
+  border-radius: 99px; margin-bottom: 2rem;
+}
+.hero-eyebrow-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--ink); display: grid; place-items: center;
+}
+.hero-eyebrow-dot::after {
+  content: ''; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--lime);
+}
+.hero-h1 {
+  font-size: clamp(2.8rem, 5.5vw, 4.8rem);
+  margin-bottom: 1.5rem;
+}
+.hero-h1 em { font-style: normal; color: var(--lime-dark); }
+.hero-sub {
+  font-size: 1.1rem; line-height: 1.65; color: var(--muted);
+  max-width: 460px; margin-bottom: 2.5rem;
+  font-weight: 300;
+}
+.hero-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.btn-primary {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem; font-weight: 700;
+  background: var(--ink); color: var(--lime);
+  padding: 1rem 2rem; border-radius: 99px;
+  border: 2px solid var(--ink); cursor: pointer;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  transition: all 0.25s; display: inline-flex; align-items: center; gap: 0.6rem;
+}
+.btn-primary:hover { background: var(--lime); color: var(--ink); transform: translateY(-2px); }
+.btn-ghost {
+  font-size: 0.9rem; font-weight: 500; color: var(--muted);
+  background: none; border: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  transition: color 0.2s;
+}
+.btn-ghost:hover { color: var(--ink); }
+.hero-trust {
+  display: flex; align-items: center; gap: 1rem; margin-top: 2.5rem;
+}
+.hero-trust-avatars { display: flex; }
+.hero-trust-avatars span {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ink); color: var(--lime);
+  border: 2px solid var(--paper);
+  font-family: 'Space Mono', monospace; font-size: 0.5rem; font-weight: 700;
+  display: grid; place-items: center;
+  margin-left: -8px;
+}
+.hero-trust-avatars span:first-child { margin-left: 0; }
+.hero-trust p { font-size: 0.82rem; color: var(--muted); }
+.hero-trust strong { color: var(--ink); }
+
+/* Hero card */
+.hero-visual {
+  position: relative;
+}
+.hero-card {
+  background: var(--ink);
+  border-radius: 24px;
+  padding: 2.5rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: var(--lime);
+  border-radius: 50%;
+  opacity: 0.15;
+}
+.hero-card-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.hero-card-label::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--lime);
+  animation: blink 1.8s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero-card-stat {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.5rem; font-weight: 900;
+  line-height: 1; color: var(--lime);
+  margin-bottom: 0.5rem;
+}
+.hero-card p { font-size: 0.9rem; color: rgba(255,255,255,0.55); margin-bottom: 2rem; }
+.hero-mini-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.hero-mini-card {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 1rem;
+}
+.hero-mini-card .val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem; font-weight: 700;
+  color: white; margin-bottom: 0.25rem;
+}
+.hero-mini-card .lbl { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+.hero-scroll-hint {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  z-index: 1;
+}
+.hero-scroll-hint span { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.06em; }
+.scroll-arrow {
+  width: 36px; height: 36px; border: 1.5px solid var(--line);
+  border-radius: 50%; display: grid; place-items: center;
+  animation: bob 2s ease-in-out infinite;
+}
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }
+
+/* ─── MARQUEE ─── */
+.marquee-wrap {
+  background: var(--ink); color: var(--lime);
+  padding: 1rem 0; overflow: hidden;
+  border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink);
+}
+.marquee-track {
+  display: flex; gap: 3rem;
+  animation: marquee 22s linear infinite;
+  white-space: nowrap;
+}
+@keyframes marquee { to { transform: translateX(-50%); } }
+.marquee-item {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 1.5rem;
+  flex-shrink: 0;
+}
+.marquee-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(200,245,58,0.4); }
+
+/* ─── SECTIONS ─── */
+section { padding: 7rem 2.5rem; }
+.container { max-width: 1200px; margin: 0 auto; }
+.section-tag {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 1.25rem;
+}
+.section-tag::before {
+  content: '';
+  display: inline-block; width: 20px; height: 2px; background: var(--lime-dark);
+}
+.section-h2 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  margin-bottom: 1.25rem;
+  max-width: 700px;
+}
+.section-sub { font-size: 1.05rem; color: var(--muted); font-weight: 300; max-width: 560px; line-height: 1.7; }
+
+/* ─── PROBLEM ─── */
+#problem { background: var(--paper); }
+.problem-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; margin-top: 4rem; }
+.pain-list { display: flex; flex-direction: column; gap: 1.25rem; }
+.pain-item {
+  display: flex; align-items: flex-start; gap: 1.25rem;
+  padding: 1.5rem; border-radius: 16px;
+  border: 1px solid var(--line);
+  background: white;
+  transition: transform 0.25s, border-color 0.25s;
+}
+.pain-item:hover { transform: translateX(6px); border-color: var(--lime-dark); }
+.pain-icon {
+  width: 40px; height: 40px; flex-shrink: 0;
+  border-radius: 10px; background: var(--warm);
+  display: grid; place-items: center; font-size: 1.1rem;
+}
+.pain-item h3 { font-size: 1rem; font-weight: 500; margin-bottom: 0.3rem; }
+.pain-item p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+.problem-visual { position: sticky; top: 120px; }
+.vs-card {
+  border-radius: 20px; overflow: hidden;
+  border: 1px solid var(--line);
+}
+.vs-header {
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.vs-col { padding: 1.25rem; text-align: center; }
+.vs-col.bad { background: #fef2f2; }
+.vs-col.good { background: var(--lime); }
+.vs-col .vs-label {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+}
+.vs-col.bad .vs-label { color: #dc2626; }
+.vs-col.good .vs-label { color: var(--ink); }
+.vs-rows { background: white; }
+.vs-row { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+.vs-cell { padding: 1rem 1.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
+.vs-cell:first-child { border-right: 1px solid var(--line); color: var(--muted); }
+.vs-cell:last-child { font-weight: 500; }
+.vs-cell .icon { font-size: 0.9rem; }
+
+/* ─── HOW IT WORKS ─── */
+#how { background: var(--ink); color: white; }
+#how .section-sub { color: rgba(255,255,255,0.5); }
+#how .section-tag { color: rgba(255,255,255,0.3); }
+.steps-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; overflow: hidden;
+  margin-top: 4rem;
+}
+.step-card {
+  background: var(--ink); padding: 2.5rem 2rem;
+  position: relative; overflow: hidden;
+  transition: background 0.3s;
+}
+.step-card:hover { background: #161614; }
+.step-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem; font-weight: 900;
+  color: rgba(255,255,255,0.05); line-height: 1;
+  margin-bottom: 1.5rem;
+}
+.step-card h3 { font-size: 1rem; font-weight: 500; margin-bottom: 0.75rem; color: white; }
+.step-card p { font-size: 0.85rem; line-height: 1.7; color: rgba(255,255,255,0.45); }
+.step-badge-tag {
+  display: inline-block;
+  background: var(--lime); color: var(--ink);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.08em; padding: 0.3rem 0.7rem;
+  border-radius: 99px; margin-bottom: 1.5rem;
+}
+
+/* STATS ROW */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; overflow: hidden;
+  margin-top: 1px;
+}
+.stat-block {
+  background: var(--ink); padding: 2.5rem;
+  transition: background 0.25s;
+}
+.stat-block:hover { background: #161614; }
+.stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem; font-weight: 900;
+  color: var(--lime); margin-bottom: 0.5rem;
+}
+.stat-block p { font-size: 0.85rem; color: rgba(255,255,255,0.45); line-height: 1.6; }
+
+/* ─── WHAT YOU GET ─── */
+#get { background: var(--warm); }
+.get-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 4rem; }
+.get-card {
+  background: white; border-radius: 20px;
+  padding: 2.5rem; border: 1px solid var(--line);
+  position: relative; overflow: hidden;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.get-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+.get-card:first-child { grid-row: span 2; background: var(--ink); color: white; }
+.get-card:first-child p { color: rgba(255,255,255,0.55); }
+.get-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 5rem; font-weight: 400; line-height: 1;
+  color: var(--lime); margin-bottom: 1.5rem;
+  text-shadow: 0 0 30px rgba(200,245,58,0.6);
+}
+.get-card:not(:first-child) .get-num { color: var(--lime); text-shadow: 0 0 40px rgba(200,245,58,0.5); }
+.get-card:not(:first-child) { position: relative; }
+.get-card-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 1rem;
+}
+.get-card h3 { font-size: 1.2rem; font-weight: 500; margin-bottom: 0.75rem; }
+.get-card p { font-size: 0.88rem; line-height: 1.7; color: var(--muted); }
+.get-pill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+.get-pill {
+  background: rgba(200,245,58,0.2); color: var(--ink);
+  font-size: 0.78rem; font-weight: 500;
+  padding: 0.35rem 0.8rem; border-radius: 99px;
+  border: 1px solid rgba(200,245,58,0.5);
+}
+
+/* ─── SECTION CTAs ─── */
+.section-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+}
+.section-cta-note {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+@media (max-width: 640px) {
+  .section-cta-row { flex-direction: column; align-items: flex-start; }
+}
+
+/* ─── WHAT YOU ACTUALLY GET ─── */
+#inside {
+  background: #0d0d0b;
+  position: relative;
+  overflow: hidden;
+}
+#inside::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px; height: 500px;
+  background: radial-gradient(ellipse at center, rgba(200,245,58,0.07), transparent 70%);
+  pointer-events: none;
+}
+#inside .section-tag { color: rgba(255,255,255,0.3); }
+#inside .section-h2 { color: white; }
+#inside .section-sub { color: rgba(255,255,255,0.45); }
+.inside-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 3.5rem;
+}
+.inside-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(200,245,58,0.15);
+  border-radius: 20px;
+  padding: 2rem 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+  backdrop-filter: blur(12px);
+}
+.inside-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,245,58,0.4), transparent);
+  opacity: 0;
+  transition: opacity 0.28s;
+}
+.inside-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(200,245,58,0.4);
+  box-shadow: 0 20px 60px rgba(200,245,58,0.1);
+}
+.inside-card:hover::before { opacity: 1; }
+.inside-card:nth-child(1),
+.inside-card:nth-child(2) {
+  grid-column: span 1;
+}
+.inside-card-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--lime);
+  text-shadow: 0 0 40px rgba(200,245,58,0.5);
+  margin-bottom: 1.25rem;
+}
+.inside-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.6rem;
+}
+.inside-card p {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.45);
+}
+.inside-card-icon {
+  width: 40px; height: 40px;
+  background: rgba(200,245,58,0.12);
+  border: 1px solid rgba(200,245,58,0.2);
+  border-radius: 10px;
+  display: grid; place-items: center;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.inside-cta-row {
+  text-align: center;
+  margin-top: 3rem;
+}
+@media (max-width: 900px) {
+  .inside-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 580px) {
+  .inside-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── RESULTS ─── */
+#results { background: var(--paper); }
+.results-layout { display: grid; grid-template-columns: 1fr 1.4fr; gap: 5rem; align-items: center; margin-top: 4rem; }
+.results-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4rem, 8vw, 8rem);
+  font-weight: 900; line-height: 0.9;
+  color: var(--ink);
+}
+.results-number em { font-style: normal; -webkit-text-stroke: 2px var(--ink); color: transparent; }
+.results-sub { font-size: 1rem; color: var(--muted); margin-top: 1.25rem; max-width: 320px; line-height: 1.7; }
+.testimonials-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.tcard {
+  background: white; border-radius: 16px;
+  padding: 1.75rem; border: 1px solid var(--line);
+  transition: transform 0.25s, border-color 0.25s;
+}
+.tcard:hover { transform: translateY(-3px); border-color: var(--lime-dark); }
+.tcard:first-child { grid-column: span 2; background: var(--ink); color: white; border-color: var(--ink); }
+.tcard-quote { font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.25rem; }
+.tcard:first-child .tcard-quote { color: rgba(255,255,255,0.8); font-size: 1rem; }
+.tcard-meta { display: flex; align-items: center; gap: 0.75rem; }
+.tcard-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--lime); color: var(--ink);
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.6rem; font-weight: 700;
+  display: grid; place-items: center;
+}
+.tcard:first-child .tcard-avatar { background: var(--lime); }
+.tcard-name { font-size: 0.85rem; font-weight: 500; }
+.tcard:first-child .tcard-name { color: rgba(255,255,255,0.6); }
+.stars { color: var(--lime-dark); font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 0.75rem; }
+
+/* ─── FUTURE ─── */
+#future { background: var(--lime); color: var(--ink); overflow: hidden; position: relative; }
+.future-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+.future-h2 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  margin-bottom: 1.5rem;
+}
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-item { display: flex; gap: 1.5rem; position: relative; }
+.tl-line {
+  display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
+  width: 20px;
+}
+.tl-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--ink); flex-shrink: 0;
+  display: grid; place-items: center;
+}
+.tl-dot::after {
+  content: '';
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--lime);
+}
+.tl-connector {
+  width: 2px; background: rgba(0,0,0,0.2); flex: 1;
+  min-height: 2rem;
+}
+.tl-content { padding-bottom: 2rem; }
+.tl-day {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(0,0,0,0.5); margin-bottom: 0.4rem;
+}
+.tl-title { font-weight: 500; margin-bottom: 0.35rem; }
+.tl-desc { font-size: 0.85rem; color: rgba(0,0,0,0.55); line-height: 1.6; }
+.future-deco {
+  position: absolute;
+  right: -100px; bottom: -100px;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.08);
+  pointer-events: none;
+}
+.future-deco-2 {
+  position: absolute;
+  right: -200px; bottom: -200px;
+  width: 700px; height: 700px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.05);
+  pointer-events: none;
+}
+
+/* ─── CTA ─── */
+#cta { background: var(--ink); color: white; }
+.cta-inner { max-width: 760px; margin: 0 auto; text-align: center; }
+.cta-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(200,245,58,0.15); color: var(--lime);
+  border: 1px solid rgba(200,245,58,0.25);
+  padding: 0.4rem 1rem; border-radius: 99px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+.cta-h2 {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  color: white; margin-bottom: 1.25rem;
+}
+.cta-sub { font-size: 1rem; color: rgba(255,255,255,0.45); line-height: 1.7; margin-bottom: 3rem; }
+.price-box {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 3rem;
+  margin-bottom: 2rem;
+}
+.price-cross {
+  font-size: 1rem; color: rgba(255,255,255,0.3);
+  text-decoration: line-through; margin-bottom: 0.5rem;
+}
+.price-main { display: flex; align-items: baseline; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.price-amount {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 5rem; font-weight: 900; color: var(--lime);
+  line-height: 1;
+}
+.price-suffix { font-size: 1.1rem; color: rgba(255,255,255,0.4); }
+.price-note { font-size: 0.85rem; color: rgba(255,255,255,0.3); margin-bottom: 2.5rem; }
+.includes-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-bottom: 2.5rem; }
+.include-pill {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.7);
+  padding: 0.5rem 1rem; border-radius: 99px;
+  font-size: 0.82rem;
+}
+.include-pill::before { content: '✓'; color: var(--lime); font-weight: 700; }
+.cta-btn {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.85rem; font-weight: 700;
+  background: var(--lime); color: var(--ink);
+  padding: 1.2rem 3rem; border-radius: 99px;
+  border: none; cursor: pointer;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  transition: all 0.25s; display: inline-flex; align-items: center; gap: 0.75rem;
+  box-shadow: 0 0 0 0 rgba(200,245,58,0);
+}
+.cta-btn:hover {
+  transform: scale(1.03) translateY(-2px);
+  box-shadow: 0 12px 40px rgba(200,245,58,0.35);
+}
+.cta-btn .arrow {
+  width: 28px; height: 28px;
+  background: var(--ink); color: var(--lime);
+  border-radius: 50%; display: grid; place-items: center;
+  font-size: 0.9rem; transition: transform 0.2s;
+}
+.cta-btn:hover .arrow { transform: translateX(3px); }
+.trust-row { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 1.5rem; }
+.trust-item { font-size: 0.8rem; color: rgba(255,255,255,0.3); display: flex; align-items: center; gap: 0.4rem; }
+.trust-icon { color: rgba(255,255,255,0.5); }
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--ink); border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 2rem 2.5rem; text-align: center;
+  color: rgba(255,255,255,0.3); font-size: 0.8rem;
+}
+footer strong { color: var(--lime); }
+
+/* ─── REVEAL ANIMATIONS ─── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.up { opacity: 1; transform: none; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+  section { padding: 5rem 1.5rem; }
+  #hero { padding: 7rem 1.5rem 4rem; }
+  .hero-inner { grid-template-columns: 1fr; gap: 3rem; }
+  .hero-sub { max-width: 100%; }
+  .problem-layout { grid-template-columns: 1fr; gap: 3rem; }
+  .problem-visual { position: static; }
+  .steps-grid { grid-template-columns: 1fr 1fr; }
+  .get-grid { grid-template-columns: 1fr; }
+  .get-card:first-child { grid-row: auto; }
+  .results-layout { grid-template-columns: 1fr; gap: 3rem; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .tcard:first-child { grid-column: auto; }
+  .future-inner { grid-template-columns: 1fr; gap: 3rem; }
+  .stats-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .hero-mini-cards { grid-template-columns: 1fr 1fr; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .price-amount { font-size: 3.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav id="navbar">
+  <div class="nav-logo">AI Content System</div>
+  <div class="nav-links">
+    <a href="#problem">The Problem</a>
+    <a href="#how">How it Works</a>
+    <a href="#results">Results</a>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Get Access →</button>
+</nav>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="hero-eyebrow">
+        <div class="hero-eyebrow-dot"></div>
+        <span class="label" style="font-size:0.7rem">System for digital creators</span>
+      </div>
+      <h1 class="display hero-h1">
+        Build an AI<br>income system<br><em>without your face</em>
+      </h1>
+      <p class="hero-sub">Turn AI output into consistent content, attention, and sales — no camera, no guesswork, no complicated setup.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+          Launch my system <span style="font-size:1rem">→</span>
+        </button>
+        <button class="btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
+          See how it works ↓
+        </button>
+      </div>
+      <div class="hero-trust">
+        <div class="hero-trust-avatars">
+          <span>AR</span><span>SK</span><span>JT</span><span>ML</span>
+        </div>
+        <p><strong>2,400+</strong> creators use this system</p>
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <div class="hero-card">
+        <div class="hero-card-label">System status — live</div>
+        <div class="hero-card-stat">$2,847</div>
+        <p>Revenue in first month using the system</p>
+        <div class="hero-mini-cards">
+          <div class="hero-mini-card">
+            <div class="val">12K+</div>
+            <div class="lbl">Visitors / month</div>
+          </div>
+          <div class="hero-mini-card">
+            <div class="val">29 min</div>
+            <div class="lbl">To create 10 videos</div>
+          </div>
+          <div class="hero-mini-card">
+            <div class="val">180K</div>
+            <div class="lbl">Views, 2nd video</div>
+          </div>
+          <div class="hero-mini-card">
+            <div class="val">0×</div>
+            <div class="lbl">Times on camera</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">
+    <span class="label" style="font-size:0.65rem;letter-spacing:0.1em">Scroll</span>
+    <div class="scroll-arrow">↓</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ MARQUEE ═══════════════════════ -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item">AI Content Engine <span class="marquee-dot"></span></div>
+    <div class="marquee-item">No Face Required <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Digital Income System <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Repeatable Growth <span class="marquee-dot"></span></div>
+    <div class="marquee-item">$97 One-Time Access <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Short-Form Content <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Built to Convert <span class="marquee-dot"></span></div>
+    <div class="marquee-item">AI Content Engine <span class="marquee-dot"></span></div>
+    <div class="marquee-item">No Face Required <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Digital Income System <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Repeatable Growth <span class="marquee-dot"></span></div>
+    <div class="marquee-item">$97 One-Time Access <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Short-Form Content <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Built to Convert <span class="marquee-dot"></span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PROBLEM ═══════════════════════ -->
+<section id="problem">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">The problem</div>
+      <h2 class="section-h2 display">Why most people never make money online</h2>
+      <p class="section-sub">Because they never build a repeatable system. They chase ideas, overthink, and post without a clear path to sales.</p>
+    </div>
+    <div class="problem-layout">
+      <div class="pain-list reveal">
+        <div class="pain-item">
+          <div class="pain-icon">🎯</div>
+          <div>
+            <h3>No system</h3>
+            <p>Random content with no connection to sales is like shouting into the void. Without a repeatable flow, you can't build consistent revenue.</p>
+          </div>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">🧠</div>
+          <div>
+            <h3>Paralysis by analysis</h3>
+            <p>You spend hours planning and never ship. Momentum dies before it starts, and every week feels like a fresh start from zero.</p>
+          </div>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">📉</div>
+          <div>
+            <h3>Inconsistency kills growth</h3>
+            <p>Posting once a week won't build momentum. The algorithm rewards systems, not bursts of motivation that fade after three days.</p>
+          </div>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">💸</div>
+          <div>
+            <h3>Attention without an offer</h3>
+            <p>You attract views but have nothing to convert them. Traffic without a structured offer is wasted effort — every single time.</p>
+          </div>
+        </div>
+      </div>
+      <div class="problem-visual reveal">
+        <div class="vs-card">
+          <div class="vs-header">
+            <div class="vs-col bad"><div class="vs-label">Without system</div></div>
+            <div class="vs-col good"><div class="vs-label">With system</div></div>
+          </div>
+          <div class="vs-rows">
+            <div class="vs-row">
+              <div class="vs-cell"><span class="icon">❌</span> Random posting</div>
+              <div class="vs-cell"><span class="icon">✅</span> Scheduled pipeline</div>
+            </div>
+            <div class="vs-row">
+              <div class="vs-cell"><span class="icon">❌</span> On camera required</div>
+              <div class="vs-cell"><span class="icon">✅</span> 100% face-free</div>
+            </div>
+            <div class="vs-row">
+              <div class="vs-cell"><span class="icon">❌</span> Hours per video</div>
+              <div class="vs-cell"><span class="icon">✅</span> 29 min for 10 videos</div>
+            </div>
+            <div class="vs-row">
+              <div class="vs-cell"><span class="icon">❌</span> Views → nothing</div>
+              <div class="vs-cell"><span class="icon">✅</span> Views → sales</div>
+            </div>
+            <div class="vs-row">
+              <div class="vs-cell"><span class="icon">❌</span> Start over weekly</div>
+              <div class="vs-cell"><span class="icon">✅</span> Compound growth</div>
+            </div>
+            <div class="vs-row">
+              <div class="vs-cell"><span class="icon">❌</span> Burned out, stuck</div>
+              <div class="vs-cell"><span class="icon">✅</span> Clear, repeatable</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-cta-row reveal">
+      <button class="btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+        Show me the system that fixes this →
+      </button>
+      <span class="section-cta-note">Fix it once. Run it forever.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ HOW IT WORKS ═══════════════════════ -->
+<section id="how">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag" style="color:rgba(255,255,255,0.35)">The method</div>
+      <h2 class="section-h2 display" style="color:white">A 4-step system from<br>setup to revenue</h2>
+      <p class="section-sub">Built for people who want to move fast without reinventing everything from scratch each week.</p>
+    </div>
+    <div class="steps-grid reveal">
+      <div class="step-card">
+        <div class="step-badge-tag">Step 01</div>
+        <div class="step-num" style="color:white">01</div>
+        <h3>Build your AI content engine</h3>
+        <p>Set up a simple creator system that produces content without filming yourself or wasting time on manual creation.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge-tag">Step 02</div>
+        <div class="step-num" style="color:white">02</div>
+        <h3>Generate short-form content consistently</h3>
+        <p>Create a repeatable flow so you publish more often, stay visible, and keep attention flowing — regardless of motivation.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge-tag">Step 03</div>
+        <div class="step-num" style="color:white">03</div>
+        <h3>Attach a digital offer to the attention</h3>
+        <p>Connect your audience to a clean digital product structure designed to turn interest into real revenue.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge-tag">Step 04</div>
+        <div class="step-num" style="color:white">04</div>
+        <h3>Convert traffic into revenue</h3>
+        <p>Your content attracts attention, your funnel captures intent, and your offer gives people a clear next step to buy.</p>
+      </div>
+    </div>
+    <div class="section-cta-row reveal" style="--cta-bg:#1a1a18">
+      <button class="btn-primary" style="background:var(--lime);color:var(--ink);border-color:var(--lime)" onclick="document.getElementById('inside').scrollIntoView({behavior:'smooth'})">
+        See what's inside the system →
+      </button>
+      <span class="section-cta-note" style="color:rgba(255,255,255,0.35)">4 steps. Zero guesswork.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ WHAT YOU ACTUALLY GET ═══════════════════════ -->
+<section id="inside">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">What's included</div>
+      <h2 class="section-h2 display">What you actually<br>get inside</h2>
+      <p class="section-sub">Everything you need to build and monetize your AI content system — without confusion.</p>
+    </div>
+    <div class="inside-grid reveal">
+
+      <div class="inside-card">
+        <div class="inside-card-num">01</div>
+        <h3>Complete system</h3>
+        <p>A clear step-by-step roadmap showing exactly how to go from zero to your first digital sales.</p>
+      </div>
+
+      <div class="inside-card">
+        <div class="inside-card-num">02</div>
+        <h3>AI workflow</h3>
+        <p>Generate content automatically using AI — without filming, editing, or wasting time every day.</p>
+      </div>
+
+      <div class="inside-card">
+        <div class="inside-card-num">03</div>
+        <h3>Monetization guide</h3>
+        <p>Structure your offer, price it correctly, and turn attention into real revenue — step by step.</p>
+      </div>
+
+      <div class="inside-card">
+        <div class="inside-card-num">04</div>
+        <h3>Templates & scripts</h3>
+        <p>Ready-to-use prompts, content structures, and hooks so you never start from scratch again.</p>
+      </div>
+
+      <div class="inside-card" style="grid-column: span 2;">
+        <div class="inside-card-num">05</div>
+        <h3>Lifetime access</h3>
+        <p>Get full access to the entire system — anytime, on any device. No subscription. No recurring fees. Pay once and keep everything.</p>
+      </div>
+
+    </div>
+    <div class="inside-cta-row reveal">
+      <button class="btn-primary" style="background:var(--lime);color:var(--ink);border-color:var(--lime)" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+        Get the full system →
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ WHAT YOU GET ═══════════════════════ -->
+<section id="get">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">What's inside</div>
+      <h2 class="section-h2 display">Everything you need,<br>nothing you don't</h2>
+    </div>
+    <div class="get-grid reveal">
+      <div class="get-card">
+        <div class="get-num">04</div>
+        <div class="get-card-tag" style="color:rgba(255,255,255,0.4)">Core modules</div>
+        <h3 style="color:white">The complete AI Content System</h3>
+        <p>A structured roadmap from setup to first conversion — every step mapped, every decision simplified.</p>
+        <div class="get-pill-row">
+          <span class="get-pill">AI workflow</span>
+          <span class="get-pill">Monetization</span>
+          <span class="get-pill">Templates</span>
+          <span class="get-pill">Scripts</span>
+        </div>
+      </div>
+      <div class="get-card">
+        <div class="get-num">01</div>
+        <div class="get-card-tag">Module one</div>
+        <h3>Step-by-step system</h3>
+        <p>A structured roadmap showing you exactly what to build, in what order, and why each step matters for your bottom line.</p>
+      </div>
+      <div class="get-card">
+        <div class="get-num">02</div>
+        <div class="get-card-tag">Module two</div>
+        <h3>AI content workflow</h3>
+        <p>Generate, organize, and publish short-form content consistently without relying on random inspiration every single day.</p>
+      </div>
+      <div class="get-card">
+        <div class="get-num">03</div>
+        <div class="get-card-tag">Module three</div>
+        <h3>Monetization structure</h3>
+        <p>Learn how to place the offer, connect it to the content, and guide attention toward a clear buying decision.</p>
+      </div>
+      <div class="get-card">
+        <div class="get-num">04</div>
+        <div class="get-card-tag">Module four</div>
+        <h3>Templates & scripts</h3>
+        <p>Ready-to-adapt prompts, hooks, and content structures to save time and move faster without starting from scratch.</p>
+      </div>
+    </div>
+    <div class="section-cta-row reveal">
+      <button class="btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+        Get instant access for $97 →
+      </button>
+      <span class="section-cta-note">One-time payment. Lifetime access.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ RESULTS ═══════════════════════ -->
+<section id="results">
+  <div class="container">
+    <div class="results-layout">
+      <div class="reveal">
+        <div class="section-tag">Real results</div>
+        <div class="results-number">
+          Real<br><em>numbers.</em><br>Real<br>people.
+        </div>
+        <p class="results-sub">These outcomes come from real creators who built the system and followed the steps — no hype, no inflated claims.</p>
+        <div style="margin-top:2rem">
+          <button class="btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+            Get the system →
+          </button>
+        </div>
+      </div>
+      <div class="testimonials-grid reveal">
+        <div class="tcard">
+          <div class="stars">★★★★★</div>
+          <div class="tcard-quote">"I've tried everything. This is the first system that actually delivered results without me being on camera. Made my first $2,847 in under 30 days."</div>
+          <div class="tcard-meta">
+            <div class="tcard-avatar">SK</div>
+            <div class="tcard-name">Sarah K. — Digital Creator</div>
+          </div>
+        </div>
+        <div class="tcard">
+          <div class="stars">★★★★★</div>
+          <div class="tcard-quote">"Made my first $400 within 3 days of posting. The AI content looks incredibly professional."</div>
+          <div class="tcard-meta">
+            <div class="tcard-avatar" style="background:var(--ink);color:var(--lime)">AR</div>
+            <div class="tcard-name">Alex R.</div>
+          </div>
+        </div>
+        <div class="tcard">
+          <div class="stars">★★★★★</div>
+          <div class="tcard-quote">"29 videos in one afternoon. I couldn't believe how fast the content was ready to post."</div>
+          <div class="tcard-meta">
+            <div class="tcard-avatar" style="background:var(--ink);color:var(--lime)">JT</div>
+            <div class="tcard-name">James T.</div>
+          </div>
+        </div>
+        <div class="tcard">
+          <div class="stars">★★★★★</div>
+          <div class="tcard-quote">"Went from 0 to 180K views on my second video. The algorithm absolutely loves this content format."</div>
+          <div class="tcard-meta">
+            <div class="tcard-avatar" style="background:var(--ink);color:var(--lime)">ML</div>
+            <div class="tcard-name">Maria L.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-cta-row reveal" style="margin-top:3rem">
+      <button class="btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+        I want these results →
+      </button>
+      <span class="section-cta-note">Join 2,400+ creators already using the system.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FUTURE ═══════════════════════ -->
+<section id="future">
+  <div class="future-deco"></div>
+  <div class="future-deco-2"></div>
+  <div class="container">
+    <div class="future-inner">
+      <div class="reveal">
+        <div class="section-tag" style="color:rgba(0,0,0,0.45)">Your trajectory</div>
+        <h2 class="display future-h2">Where you'll<br>be in 30 days</h2>
+        <p style="font-size:1rem;line-height:1.7;color:rgba(0,0,0,0.6);max-width:380px">When the system is running, you get to focus on growth while the funnel keeps converting — even when you're offline.</p>
+      </div>
+      <div class="timeline reveal">
+        <div class="tl-item">
+          <div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+          <div class="tl-content">
+            <div class="tl-day">Day 1–3</div>
+            <div class="tl-title">System is set up</div>
+            <div class="tl-desc">Your AI content engine is live. You know the full workflow and have your first content batch ready to publish.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+          <div class="tl-content">
+            <div class="tl-day">Day 4–10</div>
+            <div class="tl-title">Content is flowing</div>
+            <div class="tl-desc">You're publishing consistently. Engagement builds, views accumulate, and you start seeing organic reach.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+          <div class="tl-content">
+            <div class="tl-day">Day 11–20</div>
+            <div class="tl-title">Offer is connected</div>
+            <div class="tl-desc">Your digital product is live and linked to your content. Traffic has a destination. Clicks start turning into intent.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-line"><div class="tl-dot"></div></div>
+          <div class="tl-content">
+            <div class="tl-day">Day 21–30</div>
+            <div class="tl-title">First sales arrive</div>
+            <div class="tl-desc">Small wins become momentum. You see real cash flow and now understand exactly how to scale it further.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-cta-row reveal" style="margin-top:3rem">
+      <button class="btn-primary" style="background:var(--ink);color:var(--lime);border-color:var(--ink)" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+        Start my 30-day run →
+      </button>
+      <span class="section-cta-note" style="color:rgba(0,0,0,0.5)">Your first sales could come within the first week.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ CTA ═══════════════════════ -->
+<section id="cta">
+  <div class="container">
+    <div class="cta-inner reveal">
+      <div class="cta-badge">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--lime);animation:blink 1.8s ease-in-out infinite"></span>
+        Limited offer
+      </div>
+      <h2 class="display cta-h2">Stop guessing.<br>Build the system.</h2>
+      <p class="cta-sub">You already know what happens if you keep waiting. This is the shortcut to a cleaner content system, a structured offer, and a funnel designed to convert.</p>
+      <div class="price-box">
+        <div class="price-cross">Regular price: $297</div>
+        <div class="price-main">
+          <div class="price-amount">$97</div>
+          <div class="price-suffix">one-time</div>
+        </div>
+        <div class="price-note">No subscription. No hidden fees. Instant access.</div>
+        <div class="includes-row">
+          <span class="include-pill">Complete system</span>
+          <span class="include-pill">AI workflow</span>
+          <span class="include-pill">Monetization guide</span>
+          <span class="include-pill">Templates & scripts</span>
+          <span class="include-pill">Lifetime access</span>
+        </div>
+        <button class="cta-btn" onclick="window.location.href='https://buy.stripe.com/28EcN68F77Ga8Jw6YBbEA02'">
+          Secure instant access
+          <span class="arrow">→</span>
+        </button>
+      </div>
+      <div class="trust-row">
+        <div class="trust-item"><span class="trust-icon">🔒</span> Secure payment</div>
+        <div class="trust-item"><span class="trust-icon">⚡</span> Instant access</div>
+        <div class="trust-item"><span class="trust-icon">💳</span> One-time payment</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>AI Content System</strong> — Build a face-free income system
+  <br><br>
+  <span style="opacity:0.4">© 2025 All rights reserved</span>
+</footer>
+
+<script>
+// Progress bar
+const prog = document.getElementById('progress');
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  prog.style.width = (scrolled / total * 100) + '%';
+  navbar.classList.toggle('scrolled', scrolled > 60);
+});
+
+// Reveal on scroll
+const revealEls = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('up'), i * 80);
+      revealObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+revealEls.forEach(el => revealObs.observe(el));
+</script>
+</body>
+</html>
